@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineClassify - Movie Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        /* Age Rating Badges Colors */
+        .rating-G { background-color: #22c55e; color: white; }
+        .rating-PG { background-color: #eab308; color: black; }
+        .rating-PG-13 { background-color: #f97316; color: white; }
+        .rating-R { background-color: #ef4444; color: white; }
+        .rating-NC-17 { background-color: #7f1d1d; color: white; }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-200">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="resetApp()">
+                    <i class="fa-solid fa-film text-3xl text-indigo-500"></i>
+                    <span class="text-xl font-bold tracking-wide text-white">Cine<span class="text-indigo-500">Classify</span></span>
+                </div>
+                
+                <!-- Desktop Search -->
+                <div class="hidden md:block flex-1 max-w-md mx-4">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i class="fa-solid fa-magnifying-glass text-slate-500"></i>
+                        </span>
+                        <input type="text" id="searchInput" placeholder="Search movies, actors, or genres..." 
+                            class="w-full bg-slate-800 text-white border border-slate-700 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-slate-500 transition-all">
+                    </div>
+                </div>
+
+                <!-- Mobile Filter Button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuBtn" class="text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-sliders text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Search (Expandable) -->
+        <div id="mobileSearchPanel" class="hidden md:hidden border-t border-slate-800 bg-slate-900 p-4">
+             <input type="text" id="mobileSearchInput" placeholder="Search..." class="w-full bg-slate-800 text-white border border-slate-700 rounded-lg py-2 px-4 focus:ring-2 focus:ring-indigo-500">
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Filters & Stats -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            
+            <!-- Filter Tags -->
+            <div class="flex flex-wrap gap-2" id="genreFilters">
+                <button onclick="filterByGenre('All')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-all hover:bg-indigo-500 active-filter">All</button>
+                <button onclick="filterByGenre('Action')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Action</button>
+                <button onclick="filterByGenre('Sci-Fi')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Sci-Fi</button>
+                <button onclick="filterByGenre('Drama')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Drama</button>
+                <button onclick="filterByGenre('Comedy')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Comedy</button>
+                <button onclick="filterByGenre('Horror')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Horror</button>
+            </div>
+
+            <!-- Sort/Count -->
+            <div class="flex items-center justify-between md:justify-end w-full md:w-auto text-slate-400 text-sm">
+                <span id="movieCount">Showing 0 movies</span>
+                <div class="ml-4 flex items-center gap-2">
+                    <label for="sortSelect">Sort:</label>
+                    <select id="sortSelect" class="bg-slate-800 border-none rounded text-slate-200 text-sm focus:ring-1 focus:ring-indigo-500 py-1 px-2 cursor-pointer">
+                        <option value="newest">Newest</option>
+                        <option value="oldest">Oldest</option>
+                        <option value="rating">Top Rated</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movie Grid -->
+        <div id="movieGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Movie Cards will be injected here -->
+        </div>
+
+        <!-- No Results State -->
+        <div id="noResults" class="hidden flex flex-col items-center justify-center py-20 text-slate-500">
+            <i class="fa-solid fa-film text-6xl mb-4 opacity-20"></i>
+            <p class="text-xl font-semibold">No movies found</p>
+            <p class="text-sm">Try adjusting your search or filters.</p>
+            <button onclick="resetApp()" class="mt-4 text-indigo-400 hover:text-indigo-300 underline">Clear all filters</button>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500">
+            <p class="mb-2">&copy; 2025 CineClassify. All rights reserved.</p>
+            <p class="text-xs">Data is for demonstration purposes.</p>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="movieModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Background backdrop -->
+        <div class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-2xl bg-slate-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-700">
+                
+                <!-- Close Button -->
+                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+
+                <div class="flex flex-col md:flex-row">
+                    <!-- Modal Image -->
+                    <div class="md:w-2/5 h-64 md:h-auto relative bg-slate-900">
+                         <div id="modalImagePlaceholder" class="w-full h-full flex items-center justify-center text-slate-700 bg-slate-900">
+                            <i class="fa-solid fa-image text-4xl"></i>
+                         </div>
+                         <img id="modalImage" src="" alt="Movie Poster" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex'">
+                    </div>
+
+                    <!-- Modal Content -->
+                    <div class="md:w-3/5 p-6 md:p-8">
+                        <div class="flex items-start justify-between mb-2">
+                            <span id="modalGenre" class="text-xs font-bold tracking-wider uppercase text-indigo-400">Action</span>
+                            <div class="flex items-center gap-1 text-yellow-400">
+                                <i class="fa-solid fa-star"></i>
+                                <span id="modalRating" class="font-bold text-white">8.5</span>
+                            </div>
+                        </div>
+                        
+                        <h3 id="modalTitle" class="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">Movie Title</h3>
+                        
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-slate-400 mb-6">
+                            <span id="modalYear">2023</span>
+                            <span>&bull;</span>
+                            <span id="modalDuration">2h 15m</span>
+                            <span>&bull;</span>
+                            <span id="modalAge" class="px-2 py-0.5 rounded text-xs font-bold text-slate-900 bg-slate-200">PG-13</span>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-1">Plot Summary</h4>
+                                <p id="modalDescription" class="text-slate-400 leading-relaxed text-sm md:text-base">
+                                    Movie description goes here...
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-700/50">
+                                <div>
+                                    <h4 class="text-xs font-semibold text-slate-500 uppercase">Director</h4>
+                                    <p id="modalDirector" class="text-slate-200 text-sm">Director Name</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-slate-500 uppercase">Cast</h4>
+                                    <p id="modalCast" class="text-slate-200 text-sm truncate">Actor 1, Actor 2</p>
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-play"></i> Watch Trailer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Mock Data ---
+        const movies = [
+            {
+                id: 1,
+                title: "Inception",
+                genre: "Sci-Fi",
+                year: 2010,
+                rating: 8.8,
+                age: "PG-13",
+                duration: "2h 28m",
+                director: "Christopher Nolan",
+                cast: "Leonardo DiCaprio, Joseph Gordon-Levitt",
+                description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+                image: "https://images.unsplash.com/photo-1535905557558-afc4877a26fc?auto=format&fit=crop&q=80&w=800" // Abstract Sci-fi
+            },
+            {
+                id: 2,
+                title: "The Dark Knight",
+                genre: "Action",
+                year: 2008,
+                rating: 9.0,
+                age: "PG-13",
+                duration: "2h 32m",
+                director: "Christopher Nolan",
+                cast: "Christian Bale, Heath Ledger",
+                description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+                image: "https://images.unsplash.com/photo-1478720568477-152d9b164e63?auto=format&fit=crop&q=80&w=800" // Dark/Action vibe
+            },
+            {
+                id: 3,
+                title: "Superbad",
+                genre: "Comedy",
+                year: 2007,
+                rating: 7.6,
+                age: "R",
+                duration: "1h 53m",
+                director: "Greg Mottola",
+                cast: "Jonah Hill, Michael Cera",
+                description: "Two co-dependent high school seniors are forced to deal with separation anxiety after their plan to stage a booze-soaked party goes awry.",
+                image: "https://images.unsplash.com/photo-1517604931442-71053e3e2e3c?auto=format&fit=crop&q=80&w=800" // Party vibe
+            },
+            {
+                id: 4,
+                title: "Interstellar",
+                genre: "Sci-Fi",
+                year: 2014,
+                rating: 8.6,
+                age: "PG-13",
+                duration: "2h 49m",
+                director: "Christopher Nolan",
+                cast: "Matthew McConaughey, Anne Hathaway",
+                description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+                image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800" // Space
+            },
+            {
+                id: 5,
+                title: "The Godfather",
+                genre: "Drama",
+                year: 1972,
+                rating: 9.2,
+                age: "R",
+                duration: "2h 55m",
+                director: "Francis Ford Coppola",
+                cast: "Marlon Brando, Al Pacino",
+                description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+                image: "https://images.unsplash.com/photo-1533488765986-dfa2a9939acd?auto=format&fit=crop&q=80&w=800" // Vintage car/moody
+            },
+            {
+                id: 6,
+                title: "Toy Story",
+                genre: "Comedy",
+                year: 1995,
+                rating: 8.3,
+                age: "G",
+                duration: "1h 21m",
+                director: "John Lasseter",
+                cast: "Tom Hanks, Tim Allen",
+                description: "A cowboy doll is profoundly threatened and jealous when a new spaceman figure supplants him as top toy in a boy's room.",
+                image: "https://images.unsplash.com/photo-1535572290543-960a8046f5af?auto=format&fit=crop&q=80&w=800" // Toys
+            },
+            {
+                id: 7,
+                title: "Pulp Fiction",
+                genre: "Drama",
+                year: 1994,
+                rating: 8.9,
+                age: "R",
+                duration: "2h 34m",
+                director: "Quentin Tarantino",
+                cast: "John Travolta, Uma Thurman",
+                description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+                image: "https://images.unsplash.com/photo-1594322436404-5a0526db4d13?auto=format&fit=crop&q=80&w=800" // Diner/Noir
+            },
+            {
+                id: 8,
+                title: "Get Out",
+                genre: "Horror",
+                year: 2017,
+                rating: 7.7,
+                age: "R",
+                duration: "1h 44m",
+                director: "Jordan Peele",
+                cast: "Daniel Kaluuya, Allison Williams",
+                description: "A young African-American visits his white girlfriend's parents for the weekend, where his simmering uneasiness about their reception of him eventually reaches a boiling point.",
+                image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&q=80&w=800" // Spooky house/forest
+            },
+             {
+                id: 9,
+                title: "Finding Nemo",
+                genre: "Comedy",
+                year: 2003,
+                rating: 8.1,
+                age: "G",
+                duration: "1h 40m",
+                director: "Andrew Stanton",
+                cast: "Albert Brooks, Ellen DeGeneres",
+                description: "After his son is captured in the Great Barrier Reef and taken to Sydney, a timid clownfish sets out on a journey to bring him home.",
+                image: "https://images.unsplash.com/photo-1582967788606-a171f1080cae?auto=format&fit=crop&q=80&w=800" // Ocean
+            },
+            {
+                id: 10,
+                title: "Mad Max: Fury Road",
+                genre: "Action",
+                year: 2015,
+                rating: 8.1,
+                age: "R",
+                duration: "2h",
+                director: "George Miller",
+                cast: "Tom Hardy, Charlize Theron",
+                description: "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search for her homeland with the aid of a group of female prisoners, a psychotic worshiper, and a drifter named Max.",
+                image: "https://images.unsplash.com/photo-1533106497176-45ae19e68ba2?auto=format&fit=crop&q=80&w=800" // Desert
+            },
+            {
+                id: 11,
+                title: "Alien",
+                genre: "Horror",
+                year: 1979,
+                rating: 8.5,
+                age: "R",
+                duration: "1h 57m",
+                director: "Ridley Scott",
+                cast: "Sigourney Weaver, Tom Skerritt",
+                description: "The crew of a commercial spacecraft encounter a deadly lifeform after investigating an unknown transmission.",
+                image: "https://images.unsplash.com/photo-1605806616949-1e87b487bc2a?auto=format&fit=crop&q=80&w=800" // Dark Space
+            }
+        ];
+
+        // --- State ---
+        let currentFilter = 'All';
+        let currentSort = 'newest';
+        let searchQuery = '';
+
+        // --- DOM Elements ---
+        const movieGrid = document.getElementById('movieGrid');
+        const searchInput = document.getElementById('searchInput');
+        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        const genreFilters = document.getElementById('genreFilters');
+        const movieCount = document.getElementById('movieCount');
+        const noResults = document.getElementById('noResults');
+        const modal = document.getElementById('movieModal');
+
+        // --- Initialization ---
+        function init() {
+            renderMovies();
+
+            // Search Listeners
+            searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+            mobileSearchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+            
+            // Sort Listener
+            sortSelect.addEventListener('change', (e) => {
+                currentSort = e.target.value;
+                renderMovies();
+            });
+
+            // Mobile Menu Toggle
+            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+                const panel = document.getElementById('mobileSearchPanel');
+                panel.classList.toggle('hidden');
+            });
+        }
+
+        // --- Core Logic ---
+        function handleSearch(query) {
+            searchQuery = query.toLowerCase();
+            renderMovies();
+        }
+
+        function filterByGenre(genre) {
+            currentFilter = genre;
+            
+            // Update visual button state
+            const buttons = genreFilters.querySelectorAll('button');
+            buttons.forEach(btn => {
+                if(btn.innerText === genre) {
+                    btn.classList.remove('bg-slate-800', 'text-slate-300');
+                    btn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30');
+                } else {
+                    btn.classList.add('bg-slate-800', 'text-slate-300');
+                    btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30');
+                }
+            });
+
+            renderMovies();
+        }
+
+        function resetApp() {
+            searchInput.value = '';
+            mobileSearchInput.value = '';
+            searchQuery = '';
+            filterByGenre('All');
+        }
+
+        function getFilteredAndSortedMovies() {
+            let filtered = movies.filter(movie => {
+                const matchesGenre = currentFilter === 'All' || movie.genre === currentFilter;
+                const matchesSearch = movie.title.toLowerCase().includes(searchQuery) || 
+                                      movie.director.toLowerCase().includes(searchQuery) ||
+                                      movie.cast.toLowerCase().includes(searchQuery);
+                return matchesGenre && matchesSearch;
+            });
+
+            return filtered.sort((a, b) => {
+                if (currentSort === 'newest') return b.year - a.year;
+                if (currentSort === 'oldest') return a.year - b.year;
+                if (currentSort === 'rating') return b.rating - a.rating;
+                return 0;
+            });
+        }
+
+        function renderMovies() {
+            const displayMovies = getFilteredAndSortedMovies();
+            
+            movieCount.innerText = `Showing ${displayMovies.length} movie${displayMovies.length !== 1 ? 's' : ''}`;
+            movieGrid.innerHTML = '';
+
+            if (displayMovies.length === 0) {
+                movieGrid.classList.add('hidden');
+                noResults.classList.remove('hidden');
+            } else {
+                movieGrid.classList.remove('hidden');
+                noResults.classList.add('hidden');
+                
+                displayMovies.forEach(movie => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700/50 card-hover transition-all duration-300 cursor-pointer fade-in';
+                    card.onclick = () => openModal(movie);
+
+                    // Determine rating color class
+                    const ratingClass = `rating-${movie.age}`;
+
+                    card.innerHTML = `
+                        <div class="relative aspect-[2/3] bg-slate-900 overflow-hidden group">
+                            <div class="absolute inset-0 flex items-center justify-center text-slate-700">
+                                <i class="fa-solid fa-film text-4xl"></i>
+                            </div>
+                            <img src="${movie.image}" alt="${movie.title}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.style.display='none'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="inline-block px-2 py-1 text-xs font-bold rounded mb-2 bg-indigo-500/20 text-indigo-200 backdrop-blur-sm border border-indigo-500/30">${movie.genre}</span>
+                            </div>
+                             <div class="absolute top-3 right-3 flex flex-col gap-2 items-end">
+                                <span class="px-2 py-1 text-xs font-bold rounded shadow-sm ${ratingClass}">${movie.age}</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-white leading-tight group-hover:text-indigo-400 transition-colors line-clamp-1" title="${movie.title}">${movie.title}</h3>
+                                <div class="flex items-center text-yellow-400 text-sm font-semibold">
+                                    <i class="fa-solid fa-star text-xs mr-1"></i>${movie.rating}
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm text-slate-400 mb-3 gap-3">
+                                <span>${movie.year}</span>
+                                <span class="text-slate-600">•</span>
+                                <span>${movie.duration}</span>
+                            </div>
+                            <p class="text-sm text-slate-400 line-clamp-3 mb-4">${movie.description}</p>
+                            <div class="flex items-center text-xs font-medium text-indigo-400 group hover:text-indigo-300 transition-colors">
+                                View Details <i class="fa-solid fa-arrow-right ml-1 transform group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    `;
+                    movieGrid.appendChild(card);
+                });
+            }
+        }
+
+        // --- Modal Logic ---
+        function openModal(movie) {
+            document.getElementById('modalTitle').innerText = movie.title;
+            document.getElementById('modalGenre').innerText = movie.genre;
+            document.getElementById('modalRating').innerText = movie.rating;
+            document.getElementById('modalYear').innerText = movie.year;
+            document.getElementById('modalDuration').innerText = movie.duration;
+            document.getElementById('modalAge').innerText = movie.age;
+            document.getElementById('modalDescription').innerText = movie.description;
+            document.getElementById('modalDirector').innerText = movie.director;
+            document.getElementById('modalCast').innerText = movie.cast;
+            
+            const img = document.getElementById('modalImage');
+            img.src = movie.image;
+            img.style.display = 'block';
+
+            // Set Age badge color in modal
+            const ageBadge = document.getElementById('modalAge');
+            ageBadge.className = `px-2.5 py-1 rounded text-sm font-bold shadow-sm rating-${movie.age}`;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Initialize the app
+        init();
+
+    </script>
+</body>
+</html>
