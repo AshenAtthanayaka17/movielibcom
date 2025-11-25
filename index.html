@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Import Inter font and dark theme background */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         
         body {
@@ -14,26 +15,19 @@
             background-color: #0f172a; /* Slate 900 */
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b; 
-        }
+        /* Custom Scrollbar for aesthetics */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
+        /* Card hover effect */
         .card-hover:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(99, 102, 241, 0.4);
         }
 
+        /* Utility class for line clamping */
         .line-clamp-3 {
             display: -webkit-box;
             -webkit-line-clamp: 3;
@@ -42,12 +36,13 @@
         }
         
         /* Age Rating Badges Colors */
-        .rating-G { background-color: #22c55e; color: white; }
-        .rating-PG { background-color: #eab308; color: black; }
-        .rating-PG-13 { background-color: #f97316; color: white; }
-        .rating-R { background-color: #ef4444; color: white; }
-        .rating-NC-17 { background-color: #7f1d1d; color: white; }
+        .rating-G { background-color: #10b981; color: white; } /* Emerald */
+        .rating-PG { background-color: #f59e0b; color: black; } /* Amber */
+        .rating-PG-13 { background-color: #ef4444; color: white; } /* Red */
+        .rating-R { background-color: #dc2626; color: white; } /* Darker Red */
+        .rating-NC-17 { background-color: #4338ca; color: white; } /* Indigo 700 */
 
+        /* Fade in animation for cards */
         .fade-in {
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -61,61 +56,75 @@
 <body class="text-slate-200">
 
     <!-- Navbar -->
-    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
+    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <div class="flex items-center gap-3 cursor-pointer" onclick="resetApp()">
-                    <i class="fa-solid fa-film text-3xl text-indigo-500"></i>
-                    <span class="text-xl font-bold tracking-wide text-white">Britsenter<span class="text-indigo-500">Listings</span></span>
+                <div class="flex items-center gap-3 cursor-pointer transition-opacity hover:opacity-80" onclick="resetApp()">
+                    <i class="fa-solid fa-clapperboard text-3xl text-indigo-500"></i>
+                    <span class="text-xl font-extrabold tracking-wide text-white">Britsenter<span class="text-indigo-500 font-bold">Listings</span></span>
                 </div>
                 
                 <!-- Desktop Search -->
-                <div class="hidden md:block flex-1 max-w-md mx-4">
+                <div class="hidden md:block flex-1 max-w-lg mx-8">
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4">
                             <i class="fa-solid fa-magnifying-glass text-slate-500"></i>
                         </span>
                         <input type="text" id="searchInput" placeholder="Search movies, actors, or genres..." 
-                            class="w-full bg-slate-800 text-white border border-slate-700 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-slate-500 transition-all">
+                            class="w-full bg-slate-800 text-white border border-slate-700 rounded-full py-2 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-500 transition-all text-sm">
                     </div>
                 </div>
 
-                <!-- Mobile Filter Button -->
+                <!-- Mobile Filter/Menu Button -->
                 <div class="md:hidden">
-                    <button id="mobileMenuBtn" class="text-slate-300 hover:text-white">
-                        <i class="fa-solid fa-sliders text-xl"></i>
+                    <button id="mobileMenuBtn" class="text-slate-300 hover:text-white p-2 rounded-full hover:bg-slate-800 transition-colors">
+                        <i class="fa-solid fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
         
-        <!-- Mobile Search (Expandable) -->
-        <div id="mobileSearchPanel" class="hidden md:hidden border-t border-slate-800 bg-slate-900 p-4">
-             <input type="text" id="mobileSearchInput" placeholder="Search..." class="w-full bg-slate-800 text-white border border-slate-700 rounded-lg py-2 px-4 focus:ring-2 focus:ring-indigo-500">
+        <!-- Mobile Search and Filter Panel (Initially hidden, revealed via JS) -->
+        <div id="mobilePanel" class="hidden md:hidden border-t border-slate-800 bg-slate-900 p-4">
+            <div class="mb-4">
+               <input type="text" id="mobileSearchInput" placeholder="Search..." class="w-full bg-slate-800 text-white border border-slate-700 rounded-lg py-2 px-4 focus:ring-2 focus:ring-indigo-500 text-sm">
+            </div>
+            <div class="flex flex-wrap gap-2 justify-center" id="mobileGenreFilters">
+                <!-- Mobile genre filters mirrored from desktop -->
+            </div>
+             <div class="flex justify-center items-center mt-4 text-sm text-slate-400">
+                <label for="mobileSortSelect" class="mr-2">Sort By:</label>
+                <select id="mobileSortSelect" class="bg-slate-800 border-none rounded text-slate-200 text-sm focus:ring-1 focus:ring-indigo-500 py-1 px-2 cursor-pointer">
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="rating">Top Rated</option>
+                </select>
+            </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        <!-- Filters & Stats -->
+        <!-- Desktop Filters & Stats -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             
-            <!-- Filter Tags -->
-            <div class="flex flex-wrap gap-2" id="genreFilters">
-                <button onclick="filterByGenre('All')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-all hover:bg-indigo-500 active-filter">All</button>
-                <button onclick="filterByGenre('Action')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Action</button>
-                <button onclick="filterByGenre('Sci-Fi')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Sci-Fi</button>
-                <button onclick="filterByGenre('Drama')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Drama</button>
-                <button onclick="filterByGenre('Comedy')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Comedy</button>
-                <button onclick="filterByGenre('Horror')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Horror</button>
-                <button onclick="filterByGenre('Family/Fantasy')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Family/Fantasy</button>
+            <!-- Filter Tags (Desktop) -->
+            <div class="hidden md:flex flex-wrap gap-2" id="genreFilters">
+                <!-- Buttons injected by JS (or manually added here) -->
+                <button data-genre="All" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-all hover:bg-indigo-500">All</button>
+                <button data-genre="Action" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Action</button>
+                <button data-genre="Sci-Fi" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Sci-Fi</button>
+                <button data-genre="Drama" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Drama</button>
+                <button data-genre="Comedy" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Comedy</button>
+                <button data-genre="Horror" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Horror</button>
+                <button data-genre="Family/Fantasy" class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">Family/Fantasy</button>
             </div>
 
             <!-- Sort/Count -->
             <div class="flex items-center justify-between md:justify-end w-full md:w-auto text-slate-400 text-sm">
-                <span id="movieCount">Showing 0 movies</span>
-                <div class="ml-4 flex items-center gap-2">
+                <span id="movieCount" class="font-medium text-slate-300">Showing 0 movies</span>
+                <div class="ml-4 hidden md:flex items-center gap-2">
                     <label for="sortSelect">Sort:</label>
                     <select id="sortSelect" class="bg-slate-800 border-none rounded text-slate-200 text-sm focus:ring-1 focus:ring-indigo-500 py-1 px-2 cursor-pointer">
                         <option value="newest">Newest</option>
@@ -127,92 +136,151 @@
         </div>
 
         <!-- Movie Grid -->
-        <div id="movieGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div id="movieGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             <!-- Movie Cards will be injected here -->
         </div>
 
         <!-- No Results State -->
-        <div id="noResults" class="hidden flex flex-col items-center justify-center py-20 text-slate-500">
-            <i class="fa-solid fa-film text-6xl mb-4 opacity-20"></i>
-            <p class="text-xl font-semibold">No movies found</p>
-            <p class="text-sm">Try adjusting your search or filters.</p>
-            <button onclick="resetApp()" class="mt-4 text-indigo-400 hover:text-indigo-300 underline">Clear all filters</button>
+        <div id="noResults" class="hidden flex flex-col items-center justify-center py-20 text-slate-500 bg-slate-800/50 rounded-xl mt-10">
+            <i class="fa-solid fa-search-minus text-6xl mb-4 opacity-50 text-indigo-400"></i>
+            <p class="text-xl font-semibold">No listings match your search.</p>
+            <p class="text-sm">Please try a different keyword or genre filter.</p>
+            <button onclick="resetApp()" class="mt-6 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors font-medium shadow-md">
+                Clear Filters & Search
+            </button>
         </div>
 
     </div>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500">
-            <p class="mb-2">&copy; 2025 AshenAtthanayaka17. All rights reserved.</p>
-            <p class="text-xs">Data is for demonstration purposes only.</p>
+    <footer class="bg-slate-900 border-t border-slate-800 py-10 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8 border-b border-slate-800 pb-10 mb-8">
+                <!-- Branding/Mission -->
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-clapperboard text-2xl text-indigo-500"></i>
+                        <span class="text-xl font-extrabold tracking-wide text-white">Britsenter<span class="text-indigo-500 font-bold">Listings</span></span>
+                    </div>
+                    <p class="text-sm text-slate-400">Your trusted source for the latest movie listings and information.</p>
+                </div>
+
+                <!-- Sections (Example links) -->
+                <div>
+                    <h5 class="text-base font-semibold text-white mb-3">Sections</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Now Showing</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Coming Soon</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Exclusives</a></li>
+                    </ul>
+                </div>
+
+                <!-- Site Info -->
+                <div>
+                    <h5 class="text-base font-semibold text-white mb-3">Site Info</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">About Us</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Careers</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Press Center</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h5 class="text-base font-semibold text-white mb-3">Legal</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Terms of Use</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors">Cookies</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Connect -->
+                <div>
+                    <h5 class="text-base font-semibold text-white mb-3">Connect</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors"><i class="fab fa-facebook mr-2"></i>Facebook</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors"><i class="fab fa-twitter mr-2"></i>Twitter</a></li>
+                        <li><a href="#" class="text-slate-400 hover:text-indigo-400 transition-colors"><i class="fab fa-instagram mr-2"></i>Instagram</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Copyright and Legal -->
+            <div class="text-center text-slate-500">
+                <p class="mb-2 text-sm">&copy; 2025 Britsenter Listings. All rights reserved.</p>
+                <p class="text-xs">Data is for demonstration purposes only.</p>
+            </div>
         </div>
     </footer>
 
-    <!-- Modal -->
+
+    <!-- Modal (Movie Details) -->
     <div id="movieModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <!-- Background backdrop -->
-        <div class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        <div class="fixed inset-0 bg-slate-900/95 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
 
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <div class="relative transform overflow-hidden rounded-2xl bg-slate-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-700">
+            <div class="relative transform overflow-hidden rounded-2xl bg-slate-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-4xl border border-slate-700">
                 
                 <!-- Close Button -->
-                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
+                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
 
-                <div class="flex flex-col md:flex-row">
-                    <!-- Modal Image -->
-                    <div class="md:w-2/5 h-64 md:h-auto relative bg-slate-900">
-                         <div id="modalImagePlaceholder" class="w-full h-full flex items-center justify-center text-slate-700 bg-slate-900">
+                <!-- Modal Content Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-3">
+                    
+                    <!-- Modal Image (Span 1) -->
+                    <div class="md:col-span-1 relative bg-slate-900 aspect-[2/3] md:aspect-auto">
+                        <div id="modalImagePlaceholder" class="w-full h-full flex items-center justify-center text-slate-700 bg-slate-900">
                             <i class="fa-solid fa-image text-4xl"></i>
-                         </div>
-                         <img id="modalImage" src="" alt="Movie Poster" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex'">
+                        </div>
+                        <img id="modalImage" src="" alt="Movie Poster" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex'">
                     </div>
 
-                    <!-- Modal Content -->
-                    <div class="md:w-3/5 p-6 md:p-8">
-                        <div class="flex items-start justify-between mb-2">
-                            <span id="modalGenre" class="text-xs font-bold tracking-wider uppercase text-indigo-400">Action</span>
+                    <!-- Modal Details (Span 2) -->
+                    <div class="md:col-span-2 p-6 md:p-10">
+                        <div class="flex items-center justify-between mb-3">
+                             <span id="modalGenre" class="text-sm font-bold tracking-wider uppercase text-indigo-400 bg-indigo-400/10 p-1 rounded">Action</span>
+                             <span id="modalAge" class="px-3 py-1 text-sm font-bold rounded shadow-sm rating-PG-13">PG-13</span>
+                        </div>
+                        
+                        <h3 id="modalTitle" class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">Movie Title</h3>
+                        
+                        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-400 mb-6 border-b border-slate-700/50 pb-4">
                             <div class="flex items-center gap-1 text-yellow-400">
                                 <i class="fa-solid fa-star"></i>
-                                <span id="modalRating" class="font-bold text-white">8.5</span>
+                                <span id="modalRating" class="font-bold text-white text-base">8.5</span>
                             </div>
-                        </div>
-                        
-                        <h3 id="modalTitle" class="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">Movie Title</h3>
-                        
-                        <div class="flex flex-wrap items-center gap-3 text-sm text-slate-400 mb-6">
-                            <span id="modalYear">2023</span>
-                            <span>&bull;</span>
-                            <span id="modalDuration">2h 15m</span>
-                            <span>&bull;</span>
-                            <span id="modalAge" class="px-2 py-0.5 rounded text-xs font-bold text-slate-900 bg-slate-200">PG-13</span>
+                            <span class="text-slate-600">•</span>
+                            <span id="modalYear"><i class="fa-solid fa-calendar-alt mr-1"></i> 2023</span>
+                            <span class="text-slate-600">•</span>
+                            <span id="modalDuration"><i class="fa-solid fa-clock mr-1"></i> 2h 15m</span>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="space-y-6">
                             <div>
-                                <h4 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-1">Plot Summary</h4>
-                                <p id="modalDescription" class="text-slate-400 leading-relaxed text-sm md:text-base">
+                                <h4 class="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-2">Plot Summary</h4>
+                                <p id="modalDescription" class="text-slate-400 leading-relaxed text-base">
                                     Movie description goes here...
                                 </p>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-700/50">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <h4 class="text-xs font-semibold text-slate-500 uppercase">Director</h4>
-                                    <p id="modalDirector" class="text-slate-200 text-sm">Director Name</p>
+                                    <h4 class="text-xs font-semibold text-slate-500 uppercase mb-1">Director</h4>
+                                    <p id="modalDirector" class="text-slate-200 font-medium text-sm">Director Name</p>
                                 </div>
                                 <div>
-                                    <h4 class="text-xs font-semibold text-slate-500 uppercase">Cast</h4>
-                                    <p id="modalCast" class="text-slate-200 text-sm truncate">Actor 1, Actor 2</p>
+                                    <h4 class="text-xs font-semibold text-slate-500 uppercase mb-1">Lead Cast</h4>
+                                    <p id="modalCast" class="text-slate-200 font-medium text-sm truncate">Actor 1, Actor 2</p>
                                 </div>
                             </div>
 
-                            <div class="pt-4">
-                                <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-play"></i> Watch Trailer
+                            <div class="pt-4 border-t border-slate-700/50">
+                                <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-3 text-lg shadow-lg shadow-indigo-500/50">
+                                    <i class="fa-solid fa-ticket-alt"></i> Buy Tickets Now
                                 </button>
                             </div>
                         </div>
@@ -234,9 +302,9 @@
                 age: "PG",
                 duration: "2h 32m",
                 director: "Chris Columbus",
-                cast: "Not Listed Here",
-                description: "Harry Potter, an eleven-year-old orphan, discovers that he is a wizard and is invited to study at Hogwarts. Even as he escapes a dreary life and enters a world of magic, he finds trouble awaiting him.",
-                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQttbZNVGzKnwLBGXrKBkt0VY2J2DubjnH_lSQrJCzdSf5fe4OK8yUM27EYhteFc68Ii7Xr9g&s=10" // Abstract Sci-fi
+                cast: "Daniel Radcliffe, Emma Watson, Rupert Grint",
+                description: "Harry Potter, an eleven-year-old orphan, discovers that he is a wizard and is invited to study at Hogwarts. Even as he escapes a dreary life and enters a world of magic, he finds trouble awaiting him. This first installment sets the stage for a spectacular magical journey.",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQttbZNVGzKnwLBGXrKBkt0VY2J2DubjnH_lSQrJCzdSf5fe4OK8yUM27EYhteFc68Ii7Xr9g&s=10" 
             },
             {
                 id: 2,
@@ -247,22 +315,87 @@
                 age: "PG",
                 duration: "2h 41m",
                 director: "Chris Columbus",
-                cast: "Not Listed Here",
-                description: "A house-elf warns Harry against returning to Hogwarts, but he decides to ignore it. When students and creatures at the school begin to get petrified, Harry finds himself surrounded in mystery.",
-                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1rI0fB3GdfQCFT3HYWrIIreGt74rV1R0n8JgYUmXtzMeOCdIKv4MdmSafc0hi7DksbRtO&s=10" // Abstract Sci-fi
+                cast: "Daniel Radcliffe, Emma Watson, Rupert Grint, Kenneth Branagh",
+                description: "A house-elf warns Harry against returning to Hogwarts, but he decides to ignore it. When students and creatures at the school begin to get petrified, Harry finds himself surrounded in mystery, culminating in a dangerous confrontation in the Chamber of Secrets.",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1rI0fB3GdfQCFT3HYWrIIreGt74rV1R0n8JgYUmXtzMeOCdIKv4MdmSafc0hi7DksbRtO&s=10" 
             },
             {
                 id: 3,
-                title: "Aladin",
+                title: "Aladdin: A New World",
                 genre: "Family/Fantasy",
                 year: 2019,
                 rating: 6.9,
                 age: "PG",
                 duration: "2h 8m",
                 director: "Guy Ritchie",
-                cast: "Not Listed Here",
-                description: "Aladdin, a kind thief, woos Jasmine, the princess of Agrabah, with the help of Genie. When Jafar, the grand vizier, tries to usurp the king, Jasmine, Aladdin and Genie must stop him from succeeding.",
-                image: "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQN7rKaiXV3ch73i1CfzmnQmtyIeXv1cP_FMrzNWmdYvvSI870W" // Abstract Sci-fi
+                cast: "Will Smith, Mena Massoud, Naomi Scott",
+                description: "Aladdin, a kind thief, woos Jasmine, the princess of Agrabah, with the help of Genie. When Jafar, the grand vizier, tries to usurp the king, Jasmine, Aladdin and Genie must stop him from succeeding in this live-action retelling.",
+                image: "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQN7rKaiXV3ch73i1CfzmnQmtyIeXv1cP_FMrzNWmdYvvSI870W" 
+            },
+            {
+                id: 4,
+                title: "The Silent Watcher",
+                genre: "Horror",
+                year: 2024,
+                rating: 8.1,
+                age: "R",
+                duration: "1h 45m",
+                director: "Eliza Thorne",
+                cast: "Ava Jenkins, Michael Cross",
+                description: "A group of friends travel to a secluded cabin for a weekend getaway, only to find themselves hunted by an unseen entity. The suspense builds as they realize their only escape is through understanding the watcher's terrifying rules.",
+                image: "https://placehold.co/300x450/1e293b/94a3b8?text=Horror+Poster" 
+            },
+            {
+                id: 5,
+                title: "Cosmic Drift",
+                genre: "Sci-Fi",
+                year: 2023,
+                rating: 9.2,
+                age: "PG-13",
+                duration: "2h 20m",
+                director: "Kaelen Voss",
+                cast: "Zoe Saldana, Ryan Gosling",
+                description: "In the distant future, a lone space pilot discovers a wormhole that leads to a parallel universe, forcing him to choose between his family and saving all of known existence.",
+                image: "https://placehold.co/300x450/4f46e5/ffffff?text=Sci-Fi+Poster" 
+            },
+            {
+                id: 6,
+                title: "City of Shadows",
+                genre: "Action",
+                year: 2024,
+                rating: 7.9,
+                age: "R",
+                duration: "1h 55m",
+                director: "Marcus King",
+                cast: "Jackie Chan, Keanu Reeves",
+                description: "An ex-cop living in self-imposed exile must return to the neon-drenched streets of Neo-Kyoto to confront the gang that betrayed him, utilizing breathtaking martial arts and high-tech gadgets.",
+                image: "https://placehold.co/300x450/000000/ef4444?text=Action+Poster" 
+            },
+            {
+                id: 7,
+                title: "A Quiet Reflection",
+                genre: "Drama",
+                year: 2022,
+                rating: 8.8,
+                age: "PG",
+                duration: "2h 5m",
+                director: "Lena Sharma",
+                cast: "Viola Davis, Tom Hanks",
+                description: "A poignant story about a professor who retires to his childhood home and reflects on the choices that shaped his life, leading to a final, profound reconciliation with his past.",
+                image: "https://placehold.co/300x450/334155/e2e8f0?text=Drama+Poster" 
+            },
+            {
+                id: 8,
+                title: "The Misadventures of Barry",
+                genre: "Comedy",
+                year: 2023,
+                rating: 6.5,
+                age: "PG-13",
+                duration: "1h 35m",
+                director: "Jenny Fields",
+                cast: "Barry Allen, Cecile Horton",
+                description: "Barry, an overly optimistic but disaster-prone accountant, accidentally invents a time machine that can only travel 5 minutes into the past, leading to hilarious and escalating temporal paradoxes.",
+                image: "https://placehold.co/300x450/eab308/000000?text=Comedy+Poster" 
             }
         ];
 
@@ -276,69 +409,133 @@
         const searchInput = document.getElementById('searchInput');
         const mobileSearchInput = document.getElementById('mobileSearchInput');
         const sortSelect = document.getElementById('sortSelect');
-        const genreFilters = document.getElementById('genreFilters');
+        const mobileSortSelect = document.getElementById('mobileSortSelect');
+        const genreFiltersContainer = document.getElementById('genreFilters');
+        const mobileGenreFiltersContainer = document.getElementById('mobileGenreFilters');
         const movieCount = document.getElementById('movieCount');
         const noResults = document.getElementById('noResults');
         const modal = document.getElementById('movieModal');
+        const mobilePanel = document.getElementById('mobilePanel');
 
-        // --- Initialization ---
-        function init() {
-            renderMovies();
+        // --- Utility Functions ---
 
-            // Search Listeners
-            searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
-            mobileSearchInput.addEventListener('input', (e) => handleSearch(e.target.value));
-            
-            // Sort Listener
-            sortSelect.addEventListener('change', (e) => {
-                currentSort = e.target.value;
-                renderMovies();
-            });
+        /**
+         * Safely finds a movie by ID.
+         * @param {number} id 
+         * @returns {object|undefined}
+         */
+        function findMovieById(id) {
+            return movies.find(m => m.id === id);
+        }
 
-            // Mobile Menu Toggle
-            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-                const panel = document.getElementById('mobileSearchPanel');
-                panel.classList.toggle('hidden');
+        /**
+         * Gets the list of unique genres from the mock data.
+         * @returns {string[]}
+         */
+        function getUniqueGenres() {
+            const genres = new Set(movies.map(movie => movie.genre));
+            return ['All', ...Array.from(genres).sort()];
+        }
+
+        /**
+         * Creates a filter button element.
+         * @param {string} genre 
+         * @returns {HTMLButtonElement}
+         */
+        function createFilterButton(genre) {
+            const button = document.createElement('button');
+            button.className = `filter-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all ${genre === currentFilter ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`;
+            button.innerText = genre;
+            button.setAttribute('data-genre', genre);
+            button.onclick = () => filterByGenre(genre);
+            return button;
+        }
+
+        /**
+         * Renders the filter buttons dynamically for both desktop and mobile.
+         */
+        function renderFilterButtons() {
+            const uniqueGenres = getUniqueGenres();
+            genreFiltersContainer.innerHTML = '';
+            mobileGenreFiltersContainer.innerHTML = '';
+
+            uniqueGenres.forEach(genre => {
+                // Desktop
+                genreFiltersContainer.appendChild(createFilterButton(genre));
+                // Mobile
+                mobileGenreFiltersContainer.appendChild(createFilterButton(genre));
             });
         }
+
 
         // --- Core Logic ---
+
+        /**
+         * Handles search input from both desktop and mobile.
+         * @param {string} query 
+         */
         function handleSearch(query) {
             searchQuery = query.toLowerCase();
+            
+            // Sync the other search box to keep state consistent
+            if (document.activeElement.id === 'searchInput') {
+                 mobileSearchInput.value = query;
+            } else if (document.activeElement.id === 'mobileSearchInput') {
+                 searchInput.value = query;
+            }
+
             renderMovies();
         }
 
+        /**
+         * Filters movies by the selected genre and updates button styles.
+         * @param {string} genre 
+         */
         function filterByGenre(genre) {
             currentFilter = genre;
             
-            // Update visual button state
-            const buttons = genreFilters.querySelectorAll('button');
-            buttons.forEach(btn => {
-                if(btn.innerText === genre) {
-                    btn.classList.remove('bg-slate-800', 'text-slate-300');
-                    btn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30');
+            // Update visual button state on both containers
+            [...document.querySelectorAll('.filter-btn')].forEach(btn => {
+                if(btn.getAttribute('data-genre') === genre) {
+                    btn.classList.remove('bg-slate-800', 'text-slate-300', 'hover:bg-slate-700');
+                    btn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30', 'hover:bg-indigo-500');
                 } else {
-                    btn.classList.add('bg-slate-800', 'text-slate-300');
-                    btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30');
+                    btn.classList.add('bg-slate-800', 'text-slate-300', 'hover:bg-slate-700');
+                    btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-500/30', 'hover:bg-indigo-500');
                 }
             });
 
             renderMovies();
         }
 
+        /**
+         * Resets all filters and search inputs to default state.
+         */
         function resetApp() {
             searchInput.value = '';
             mobileSearchInput.value = '';
+            sortSelect.value = 'newest';
+            mobileSortSelect.value = 'newest';
             searchQuery = '';
+            currentSort = 'newest';
             filterByGenre('All');
         }
 
+        /**
+         * Applies filtering, sorting, and searching to the full movie list.
+         * @returns {object[]}
+         */
         function getFilteredAndSortedMovies() {
             let filtered = movies.filter(movie => {
                 const matchesGenre = currentFilter === 'All' || movie.genre === currentFilter;
-                const matchesSearch = movie.title.toLowerCase().includes(searchQuery) || 
-                                      movie.director.toLowerCase().includes(searchQuery) ||
-                                      movie.cast.toLowerCase().includes(searchQuery);
+                
+                // Check if search query matches title, director, or cast
+                const query = searchQuery;
+                const matchesSearch = movie.title.toLowerCase().includes(query) || 
+                                      movie.director.toLowerCase().includes(query) ||
+                                      movie.cast.toLowerCase().includes(query) ||
+                                      movie.genre.toLowerCase().includes(query);
+                
                 return matchesGenre && matchesSearch;
             });
 
@@ -350,11 +547,14 @@
             });
         }
 
+        /**
+         * Renders the movie grid based on current state.
+         */
         function renderMovies() {
             const displayMovies = getFilteredAndSortedMovies();
             
             movieCount.innerText = `Showing ${displayMovies.length} movie${displayMovies.length !== 1 ? 's' : ''}`;
-            movieGrid.innerHTML = '';
+            movieGrid.innerHTML = ''; // Clear previous cards
 
             if (displayMovies.length === 0) {
                 movieGrid.classList.add('hidden');
@@ -365,42 +565,47 @@
                 
                 displayMovies.forEach(movie => {
                     const card = document.createElement('div');
-                    card.className = 'bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700/50 card-hover transition-all duration-300 cursor-pointer fade-in';
-                    card.onclick = () => openModal(movie);
+                    card.className = 'bg-slate-800 rounded-xl shadow-lg border border-slate-700/50 card-hover transition-all duration-300 cursor-pointer fade-in';
+                    // Store ID on element for easy lookup in openModal
+                    card.setAttribute('data-movie-id', movie.id); 
+                    card.onclick = () => openModal(movie.id);
 
                     // Determine rating color class
-                    const ratingClass = `rating-${movie.age}`;
+                    const ratingClass = `rating-${movie.age.replace(/-/g, '')}`;
 
                     card.innerHTML = `
-                        <div class="relative aspect-[2/3] bg-slate-900 overflow-hidden group">
+                        <div class="relative aspect-[2/3] bg-slate-900 overflow-hidden group rounded-t-xl">
                             <div class="absolute inset-0 flex items-center justify-center text-slate-700">
-                                <i class="fa-solid fa-film text-4xl"></i>
+                                <i class="fa-solid fa-clapperboard text-4xl"></i>
                             </div>
-                            <img src="${movie.image}" alt="${movie.title}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.style.display='none'">
-                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
-                            <div class="absolute bottom-4 left-4 right-4">
-                                <span class="inline-block px-2 py-1 text-xs font-bold rounded mb-2 bg-indigo-500/20 text-indigo-200 backdrop-blur-sm border border-indigo-500/30">${movie.genre}</span>
+                            <img src="${movie.image}" alt="${movie.title} Poster" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.style.display='none'">
+                            
+                            <!-- Rating Badge -->
+                            <div class="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                                <span class="px-2 py-1 text-xs font-bold rounded shadow-md ${ratingClass}">${movie.age}</span>
                             </div>
-                             <div class="absolute top-3 right-3 flex flex-col gap-2 items-end">
-                                <span class="px-2 py-1 text-xs font-bold rounded shadow-sm ${ratingClass}">${movie.age}</span>
+
+                            <!-- Genre and Rating Overlay -->
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-900/90 to-transparent">
+                                <div class="flex justify-between items-center">
+                                    <span class="inline-block px-2 py-1 text-xs font-bold rounded bg-indigo-500/20 text-indigo-200 backdrop-blur-sm border border-indigo-500/30">${movie.genre}</span>
+                                    <div class="flex items-center text-yellow-400 text-sm font-semibold">
+                                        <i class="fa-solid fa-star text-xs mr-1"></i>${movie.rating}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="p-5">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="text-lg font-bold text-white leading-tight group-hover:text-indigo-400 transition-colors line-clamp-1" title="${movie.title}">${movie.title}</h3>
-                                <div class="flex items-center text-yellow-400 text-sm font-semibold">
-                                    <i class="fa-solid fa-star text-xs mr-1"></i>${movie.rating}
-                                </div>
-                            </div>
+                            <h3 class="text-xl font-bold text-white leading-snug mb-1 group-hover:text-indigo-400 transition-colors line-clamp-2" title="${movie.title}">${movie.title}</h3>
                             <div class="flex items-center text-sm text-slate-400 mb-3 gap-3">
-                                <span>${movie.year}</span>
+                                <span><i class="fa-solid fa-calendar-alt text-xs mr-1"></i>${movie.year}</span>
                                 <span class="text-slate-600">•</span>
-                                <span>${movie.duration}</span>
+                                <span><i class="fa-solid fa-clock text-xs mr-1"></i>${movie.duration}</span>
                             </div>
                             <p class="text-sm text-slate-400 line-clamp-3 mb-4">${movie.description}</p>
-                            <div class="flex items-center text-xs font-medium text-indigo-400 group hover:text-indigo-300 transition-colors">
-                                View Details <i class="fa-solid fa-arrow-right ml-1 transform group-hover:translate-x-1 transition-transform"></i>
-                            </div>
+                            <span class="inline-flex items-center text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+                                View Details <i class="fa-solid fa-arrow-right ml-1 transform transition-transform group-hover:translate-x-1"></i>
+                            </span>
                         </div>
                     `;
                     movieGrid.appendChild(card);
@@ -409,44 +614,96 @@
         }
 
         // --- Modal Logic ---
-        function openModal(movie) {
+
+        /**
+         * Opens the modal and populates it with movie data.
+         * @param {number} movieId 
+         */
+        function openModal(movieId) {
+            const movie = findMovieById(movieId);
+            if (!movie) return;
+
             document.getElementById('modalTitle').innerText = movie.title;
             document.getElementById('modalGenre').innerText = movie.genre;
             document.getElementById('modalRating').innerText = movie.rating;
-            document.getElementById('modalYear').innerText = movie.year;
-            document.getElementById('modalDuration').innerText = movie.duration;
-            document.getElementById('modalAge').innerText = movie.age;
+            document.getElementById('modalYear').innerHTML = `<i class="fa-solid fa-calendar-alt mr-1"></i> ${movie.year}`;
+            document.getElementById('modalDuration').innerHTML = `<i class="fa-solid fa-clock mr-1"></i> ${movie.duration}`;
             document.getElementById('modalDescription').innerText = movie.description;
             document.getElementById('modalDirector').innerText = movie.director;
             document.getElementById('modalCast').innerText = movie.cast;
             
             const img = document.getElementById('modalImage');
             img.src = movie.image;
-            img.style.display = 'block';
+            img.style.display = movie.image ? 'block' : 'none';
+            document.getElementById('modalImagePlaceholder').style.display = movie.image ? 'none' : 'flex';
 
-            // Set Age badge color in modal
+
+            // Set Age badge color and text in modal
             const ageBadge = document.getElementById('modalAge');
-            ageBadge.className = `px-2.5 py-1 rounded text-sm font-bold shadow-sm rating-${movie.age}`;
+            ageBadge.innerText = movie.age;
+            ageBadge.className = `px-3 py-1 text-sm font-bold rounded shadow-sm rating-${movie.age.replace(/-/g, '')}`;
 
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         }
 
+        /**
+         * Closes the modal.
+         */
         function closeModal() {
             modal.classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
 
-        // Close modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                closeModal();
-            }
-        });
+        // --- Initialization and Event Binding ---
+        function init() {
+            // Initial render of filters and movies
+            renderFilterButtons();
+            renderMovies();
 
-        // Initialize the app
-        init();
+            // Search Listeners
+            searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+            mobileSearchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+            
+            // Sort Listeners
+            const updateSort = (e) => {
+                currentSort = e.target.value;
+                // Sync the other select box
+                if (e.target.id === 'sortSelect') {
+                    mobileSortSelect.value = currentSort;
+                } else {
+                    sortSelect.value = currentSort;
+                }
+                renderMovies();
+            };
+            sortSelect.addEventListener('change', updateSort);
+            mobileSortSelect.addEventListener('change', updateSort);
 
+            // Mobile Menu Toggle
+            document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+                mobilePanel.classList.toggle('hidden');
+                // Ensure focus remains responsive
+                if (!mobilePanel.classList.contains('hidden')) {
+                     mobileSearchInput.focus();
+                }
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Global functions exposed for internal use
+        window.filterByGenre = filterByGenre;
+        window.resetApp = resetApp;
+        window.closeModal = closeModal;
+        window.openModal = openModal;
+
+        // Initialize the app on load
+        window.onload = init;
     </script>
 </body>
 </html>
